@@ -78,7 +78,7 @@ O avaliador (`kb-evaluator`) precisa usar o `kb.md` **inteiro** (já foi violado
 Se `kb_integra == false`, a run é marcada **suspeita** — causas: cópia corrompida/errada (hash difere), leitura parcial (linhas divergem) **ou** leitura que não chegou ao fim (última linha diverge). O `/run-eval` sinaliza na saída. Fallback: sub-checagem que não computa vira `"unknown"` (não força `false`); se nenhuma for conclusiva, `kb_integra = null`. **Nunca aborta por isso** — é flag, não gate. Em `/create-kb` há um trio por lado (champion e candidate, cada um: hash da sua cópia + `kb_linhas_lidas` vs `KB_LINHAS` + `kb_ultima_linha` vs `KB_ULTIMA_LINHA` daquele lado).
 
 > **Nível de garantia (honesto):** o isolamento do segredo aqui é **na prática** (o avaliador tem `Read`, mas não recebe `KB_DIR`/slug, então não localiza `questions.secret.json`), não "por construção". A alternativa "por construção" (MCP `get_kb` sem filesystem) foi descartada por tocar o frágil `setup-mcp.sh`. Se algum dia o isolamento por construção virar requisito, o caminho é o MCP — **discuta antes**.
-
+ 
 ## Layout (o que é versionado vs gerado)
 
 **Versionado:**
