@@ -46,7 +46,9 @@ Esse inventário é o seu contrato de completude: **todo item inventariado vira 
 
 ## Passo 3 — Contrato do formato de saída
 
-O arquivo é markdown com **frontmatter YAML** e, para cada item endereçável, um bloco ` ```yaml meta ` seguido de 1–3 linhas de prosa (comentário para humano — nada essencial só na prosa). **Referências são sempre por `id`, nunca repetindo o valor literal.**
+O arquivo é markdown com **frontmatter YAML** e, para cada item endereçável, um bloco ` ```yaml meta ` seguido de **no máximo 1 linha** de prosa — e só quando o YAML não bastar para um humano entender o bloco (ex.: uma nuance de negócio que não cabe em nenhum campo). Se os campos YAML já são autoexplicativos, **omita a prosa**. **Referências são sempre por `id`, nunca repetindo o valor literal.**
+
+> **Por que apertar a prosa:** o `kb-layer.md` não substitui o `kb.md` — ele é aditivo (extrai filtros repetidos em `policy`s nomeadas, o que kb.md não faz). Prosa que só repete o que o YAML já diz é o maior ofensor de tamanho hoje. Cortá-la é o que torna o layer barato o suficiente para ter um consumidor de custo sensível a tokens (`/agent-brief` — reexpressa o `kb-layer.md`, não o `kb.md` inteiro).
 
 `id`: kebab-case, minúsculas, derivado do **título/significado** (`Receita MDR — Total` → `receita-mdr-total`). Único no arquivo inteiro.
 
@@ -138,8 +140,11 @@ direction: higher_is_better | lower_is_better | neutral
 pitfalls: [<ids>]
 status: stable | draft
 status_reason: <só se draft — ex.: "sem query validada; fonte não sincronizada">
+in_scope: true | false           # ver regra abaixo — omitir se o kb.md não disser
 provenance: [<ids de source do frontmatter>]
 ```
+
+`in_scope` (opcional, aqui e em `report`): marca se o indicador é **respondível ao vivo** — algo que o `kb.md` documenta como tile/pergunta oficial de um painel (`true`) ou que o `kb.md` explicitamente tira de cena (`false`: "não é tile", "placeholder vazio", "fora do dashboard", "não renderizado", tabela-fonte sem exposição). **Nunca infira por ausência de menção** — se o `kb.md` não afirma nem nega, **omita o campo** (fica "não confirmado" para quem consumir a camada depois, nunca "liberado por omissão"). Este campo é o que viabiliza gerar uma whitelist de indicadores sem reler o `kb.md` inteiro.
 
 O modelo de composição é: `SELECT <expr> FROM <source.table> WHERE <predicados das policies> AND <janela em source.date_column>`. Por isso `expr` é a expressão **nua** — o recorte vem das `policies`. Nenhum filtro é escrito duas vezes.
 
@@ -166,7 +171,13 @@ params:
   - {name: inicio, type: date}
   - {name: fim, type: date}
 status: stable
+in_scope: true | false           # mesma regra da measure — omitir se o kb.md não disser
+looker_explore: <model.explore>  # só se o kb.md tiver uma linha "Via A (Looker nativo)" para este report
+looker_fields: [<campos>]        # idem — copiado verbatim da linha "Via A", nunca deduzido
+looker_filters: {<filtro>: <valor>}  # idem
 ```
+
+`looker_explore`/`looker_fields`/`looker_filters` só existem quando o `kb-builder` já documentou a via nativa do Looker (linha "Via A (Looker nativo, paridade garantida): ..." logo após a linha "Fonte:" do KPI) — é reexpressão pura do que já está no `kb.md`, nunca uma consulta nova ao Looker. Ausente no `kb.md` → omita os três campos.
 
 ```sql
 <A QUERY COPIADA VERBATIM DO kb.md — caractere por caractere>

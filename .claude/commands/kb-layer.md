@@ -78,6 +78,8 @@ Camada semântica gerada — knowledge-bases/<kb>/kb-layer.md
 
 Depois, uma linha de contexto: o `kb.md` segue intacto e canônico; o `kb-layer.md` é derivado e pode ser regerado com `/kb-layer <kb> --force` sempre que o `kb.md` mudar.
 
+> **Consumidor:** o `/agent-brief <kb>` lê o `kb-layer.md` (quando existir) em vez do `kb.md` inteiro — é uma fonte mais barata em tokens porque é estruturada e sem a prosa/narrativa longa do `kb.md`. Isso não afeta o `kb-evaluator`/`run-eval` (que continuam lendo `kb.md`, Invariante #8 do CLAUDE.md) — é um consumidor novo, não uma substituição. Por isso, se o `kb.md` mudar de forma relevante para comportamento de agente (novo indicador liberado/retirado do painel, nova política de sinal), vale regerar com `--force` antes de rodar `/agent-brief`.
+
 ## Regras invioláveis
 
 1. **Nunca modifique o `kb.md`.** O comando só escreve em `kb-layer.md`.

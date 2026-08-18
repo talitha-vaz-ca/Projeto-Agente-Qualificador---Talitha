@@ -12,6 +12,8 @@ Verificacoes (deterministicas, sem dependencias externas):
   7. todo `report` tem query executavel (`SELECT` + `FROM`); fragmento de
      formula e' measure, nao report
   8. SQL: toda query do kb.md aparece VERBATIM no layer (identidade, nao contagem)
+  9. `in_scope`, quando presente, e' literal `true` ou `false` (campo opcional -
+     ausencia nao e' violacao)
 
 Uso:  python scripts/check-kb-layer.py <kb-layer.md> [kb.md]
 Saida: relatorio legivel + exit 1 se houver violacao.
@@ -66,7 +68,7 @@ def parse(texto):
 
     refs = []  # (id, campo, kind do bloco)
     for bloco in BLOCK_RE.findall(texto):
-        kind = bid = None
+        kind = bid = in_scope_val = None
         lista = None  # campo de LIST_REFS aberto em estilo bloco
         for linha in bloco.splitlines():
             item = ITEM_RE.match(linha)
@@ -86,6 +88,8 @@ def parse(texto):
                 kind = clean(val)
             elif chave == "id" and bid is None:
                 bid = clean(val)
+            elif chave == "in_scope" and in_scope_val is None:
+                in_scope_val = clean(val)
             elif chave in LIST_REFS:
                 inner = val.strip()
                 if inner.startswith("[") and inner.endswith("]"):
@@ -127,6 +131,11 @@ def parse(texto):
             problemas.append("id duplicado: %s" % bid)
         definidos.add(bid)
         kinds[kind] = kinds.get(kind, 0) + 1
+
+        if in_scope_val is not None and in_scope_val not in ("true", "false"):
+            problemas.append(
+                "in_scope invalido: '%s' no bloco '%s' (deve ser literal true ou false)"
+                % (in_scope_val, bid))
 
     penduradas = sorted({(r, campo) for r, campo, _ in refs if r not in definidos})
     return definidos, kinds, problemas, penduradas

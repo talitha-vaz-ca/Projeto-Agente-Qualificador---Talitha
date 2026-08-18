@@ -30,6 +30,11 @@
       "name": "kb-layer",
       "path": ".claude/commands/kb-layer.md",
       "description": "Converte um kb.md já validado para a camada semântica estruturada kb-layer.md (blocos ```yaml meta``` endereçáveis por id: source/policy/measure/report/pitfall/term/note). Derivação pura — não toca o kb.md, não consulta fontes externas, não avalia. Confere integridade com scripts/check-kb-layer.py. Uso: /kb-layer <kb> [--force]"
+    },
+    {
+      "name": "agent-brief",
+      "path": ".claude/commands/agent-brief.md",
+      "description": "Gera knowledge-bases/<kb>/agent-brief.md — contrato de comportamento para um agente conversacional ao vivo construído sobre a KB (regras invioláveis, whitelist de indicadores respondíveis, política de \"fora do escopo\" com redirecionamento, confiabilidade temporal, convenções de leitura, tom de resposta). Lê kb-layer.md quando existir (mais barato em tokens) ou kb.md como fallback. Derivação pura — não toca kb.md/kb-layer.md, não consulta fontes externas, não avalia. Uso: /agent-brief <kb> [--force]"
     }
   ],
   "agents": [
@@ -57,6 +62,11 @@
       "name": "kb-restructurer",
       "path": ".claude/agents/kb-restructurer.md",
       "description": "Converte um kb.md já validado para a camada semântica estruturada kb-layer.md — blocos ```yaml meta``` endereçáveis por id (source, policy, measure, report, pitfall, term, note). Fonte ÚNICA é o kb.md: não consulta Looker/Metabase/BigQuery/repos e não descobre conteúdo novo. Reexpressa, nunca reescreve — SQL validada é copiada verbatim; campo sem base no kb.md é omitido, nunca inventado. Invocado pelo /kb-layer."
+    },
+    {
+      "name": "agent-brief-writer",
+      "path": ".claude/agents/agent-brief-writer.md",
+      "description": "Converte uma KB já validada (kb-layer.md, ou kb.md quando o layer não existe) num contrato de comportamento para agente conversacional — knowledge-bases/<kb>/agent-brief.md. Regras invioláveis, whitelist de indicadores respondíveis, política de \"fora do escopo\", confiabilidade temporal, convenções de leitura e tom de resposta. Fonte ÚNICA é o arquivo recebido: não consulta Looker/Metabase/BigQuery e não descobre conteúdo novo. Invocado pelo /agent-brief."
     }
   ],
   "mcpServers": {

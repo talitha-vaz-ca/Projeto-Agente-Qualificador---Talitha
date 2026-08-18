@@ -85,6 +85,8 @@ Para cada URL em `LOOKER_URLS` e `METABASE_URLS` (split por espaço/quebra de li
 
 Para cada chamada bem-sucedida, capture: título, descrição (se houver), tabelas/colunas referenciadas, SQL (literal — não reescreva). Para cada falha (auth, URL inválida, timeout): registre a URL + erro curto e siga adiante. **Não aborte por falha individual.**
 
+**Só para Looker** (`get_dashboard`/`get_look`): capture também, do mesmo retorno, `query.model`, `query.explore`, `query.fields` e `query.filters` — a MCP já devolve isso estruturado, sem chamada extra. É a **"Via A"**: reproduzir o tile no próprio Looker (`fields`/`filters` nativos do explore), com paridade garantida, em vez de só a SQL adaptada (Via B, Passo 4). Guarde por KPI para usar no Passo 4. Se `fields`/`filters` vierem vazios (ex.: `get_explore`, que devolve catálogo de dimensions/measures, não uma query) ou a fonte for Metabase, não há Via A para aquele KPI — **não fabrique**.
+
 ## Passo 3b — Cross-reference com `repos/` (código autoritativo)
 
 Os repos sincronizados pelo `/run-eval` no Passo 0 vivem em `repos/<nome>/` na raiz do projeto. Eles contêm as definições autoritativas que respaldam o que o Looker/Metabase mostram. Hoje:
@@ -132,6 +134,7 @@ Use Write para escrever `<TARGET_PATH>` com esta estrutura:
   ### <Título>
   > Fonte: <url> · LookML/Dataform: `repos/<nome>/<caminho>` (do Passo 3b; senão omitir)
   > <definição de negócio + a FÓRMULA em prosa (não dentro de bloco sql)>
+  > Via A (Looker nativo, paridade garantida): model=`<query.model>` explore=`<query.explore>` · fields=[<query.fields>] · filters={<query.filters>}   (SÓ se a fonte é Looker e fields/filters vieram não-vazios no Passo 3 — senão omita a linha inteira)
 
   ```sql
   <UMA query completa e executável (SELECT/WITH), com @inicio/@fim (DATE) para o período.
@@ -159,6 +162,7 @@ Use Write para escrever `<TARGET_PATH>` com esta estrutura:
 
 **Regras**:
 - **Convenção de query (obrigatória):** cada bloco ```` ```sql ```` é **UMA query completa e executável** (`SELECT`/`WITH`), parametrizada por **`@inicio`/`@fim` (DATE)** para o período. Fórmulas, expressões e explicações vão para **prosa** — nunca dentro de ```` ```sql ````. Sem placeholders textuais (`'<inicio>'`). **Adapte** a SQL das fontes para esse formato (não copie fragmentos crus). É isso que a varredura `validate_kb_queries` (dry-run) consegue validar; um ```` ```sql ```` que não seja query completa aparece como violação.
+- **Via A é opcional e nunca fabricada:** a linha "Via A (Looker nativo...)" só entra quando o Passo 3 capturou `fields`/`filters` não-vazios daquele tile/look. Fonte Metabase, `fields`/`filters` vazios, ou KPI composto sem tile único correspondente → omita a linha (não deixe `fields=[]`/`filters={}` vazios só para preencher o template).
 - Se uma fonte vier 100% vazia (todas URLs falharam), declare na seção: `> ⚠ Looker: 0 fontes processadas com sucesso` em vez de fabricar conteúdo.
 - Date stamp: use `date +%Y-%m-%d` via Bash.
 
